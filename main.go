@@ -1,6 +1,7 @@
 package main
 
 import (
+	"awesomeProject/utils"
 	"fmt"
 	"net/http"
 )
@@ -18,7 +19,7 @@ func main() {
 }
 
 func homePage(w http.ResponseWriter, r *http.Request) {
-	err := printDefaultPage(w)
+	err := utils.PrintDefaultPage(w)
 
 	if err != nil {
 		fmt.Println(err)
@@ -29,11 +30,11 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 func switchProtection(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Switch protection")
 
-	if getDpiProtectionStatus() == "OFF" {
+	if utils.GetDpiProtectionStatus() == "OFF" {
 		fmt.Println("Process doesn't exist")
-		executeSimpleShellCommand("/etc/goodbyeDPI1.sh")
+		utils.ExecuteSimpleShellCommand("/etc/goodbyeDPI1.sh")
 	} else {
 		fmt.Println("Process exist. Disable DPI protection")
-		executeSimpleShellCommand("/etc/disableDPIProtection.sh")
+		utils.ExecuteSimpleShellCommand("/etc/disableDPIProtection.sh")
 	}
 }

@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 	"syscall"
 )
 
-func getDpiProtectionStatus() string {
+func GetDpiProtectionStatus() string {
 	fileName := "/tmp/dpi.run"
 	if _, err := os.Stat(fileName); errors.Is(err, os.ErrNotExist) {
 		return "OFF"
@@ -51,7 +51,7 @@ func getDpiProtectionStatus() string {
 	return "ON"
 }
 
-func executeSimpleShellCommand(cmd string) {
+func ExecuteSimpleShellCommand(cmd string) {
 	command := exec.Command(cmd)
 	output, err := command.Output()
 	if err != nil {

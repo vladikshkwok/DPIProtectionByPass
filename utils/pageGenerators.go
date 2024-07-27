@@ -1,11 +1,11 @@
-package main
+package utils
 
 import (
 	"fmt"
 	"net/http"
 )
 
-func printDefaultPage(w http.ResponseWriter) error {
+func PrintDefaultPage(w http.ResponseWriter) error {
 	_, err := fmt.Fprint(w, `<!DOCTYPE html>
 <html lang="en">
 <body>
@@ -13,7 +13,7 @@ func printDefaultPage(w http.ResponseWriter) error {
 <div class="container">
 	<div class="vertical-center">
 		<form action="/switch" method="get" target="dummyframe">
-		  <button type="submit">Switch DPI protection (current status: `+getDpiProtectionStatus()+`)</button>
+		  <button type="submit">Switch DPI protection (current status: `+GetDpiProtectionStatus()+`)</button>
 		</form>
 	</div>
 </div>
