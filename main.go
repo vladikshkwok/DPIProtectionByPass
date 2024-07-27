@@ -32,7 +32,7 @@ func switchProtection(w http.ResponseWriter, r *http.Request) {
 
 	if utils.GetDpiProtectionStatus() == "OFF" {
 		fmt.Println("Process doesn't exist")
-		utils.ExecuteSimpleShellCommand("/etc/goodbyeDPI1.sh")
+		utils.ExecuteSimpleShellCommand("/etc/goodbyeDPI.sh")
 	} else {
 		fmt.Println("Process exist. Disable DPI protection")
 		utils.ExecuteSimpleShellCommand("/etc/disableDPIProtection.sh")
