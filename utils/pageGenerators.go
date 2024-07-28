@@ -9,13 +9,14 @@ func PrintDefaultPage(w http.ResponseWriter) error {
 	dpiProtectionStatus := GetDpiProtectionStatus()
 	loadAverage := GetLoadAverage()
 	memoryStats := GetMemoryStats()
+	memoryUsedPercentage := float64(memoryStats.MemTotal-memoryStats.MemAvailable) / float64(memoryStats.MemTotal) * 100
 	_, err := fmt.Fprintf(w, `<!DOCTYPE html>
 <html lang="en">
 <body>
 <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
 <div class="device-stats">
-<div class="load-average"> Load Average: %f %f %f. Last created PID: %d</div>
-<div class="memory-stats"> Memory Stats: %d kB available of %d (used %d %%)</div>
+<div class="load-average"> Load Average: %.2f %.2f %.2f. Last created PID: %d</div>
+<div class="memory-stats"> Memory Stats: %d kB available of %d (used %.2f %%)</div>
 </div>
 <div class="container">
 	<div class="vertical-center">
@@ -47,7 +48,7 @@ button {
 </style>
 </html>
 `, loadAverage.Load1, loadAverage.Load5, loadAverage.Load15, loadAverage.LastCreatedPid,
-		memoryStats.MemAvailable, memoryStats.MemTotal, (memoryStats.MemTotal-memoryStats.MemAvailable)/memoryStats.MemTotal*100,
+		memoryStats.MemAvailable, memoryStats.MemTotal, memoryUsedPercentage,
 		dpiProtectionStatus)
 
 	return err
