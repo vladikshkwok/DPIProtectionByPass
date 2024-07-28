@@ -51,7 +51,6 @@ func GetLoadAverage() domain.LoadAvg {
 }
 
 func parseLine(raw string) (key string, value int) {
-	fmt.Println(raw)
 	text := strings.ReplaceAll(raw[:len(raw)-2], " ", "")
 	keyValue := strings.Split(text, ":")
 	return keyValue[0], toInt(keyValue[1])
