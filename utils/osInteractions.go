@@ -45,7 +45,7 @@ func GetLoadAverage() domain.LoadAvg {
 		res.Load1 = toFloat(splittedText[0])
 		res.Load5 = toFloat(splittedText[1])
 		res.Load15 = toFloat(splittedText[2])
-		res.LastCreatedPid = toInt(splittedText[3])
+		res.LastCreatedPid = toInt(splittedText[4])
 	}
 	return res
 }
