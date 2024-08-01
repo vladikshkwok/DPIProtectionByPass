@@ -17,8 +17,8 @@ func main() {
 	mux.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./css"))))
 
 	mux.HandleFunc("/", indexHandler(templates, page))
-	mux.HandleFunc("/router/stats", routerStatsHandler(templates, page))
-	mux.HandleFunc("/dpi/switch", dpiSwitchHandler(templates, page))
+	mux.HandleFunc("GET /router/stats", routerStatsHandler(templates, page))
+	mux.HandleFunc("POST /dpi/switch", dpiSwitchHandler(templates, page))
 
 	log.Println("Server started on :8082")
 	if err := http.ListenAndServe(":8082", logRequest(mux)); err != nil {
@@ -48,11 +48,6 @@ func indexHandler(templates *domain.Templates, page *domain.PageData) http.Handl
 
 func routerStatsHandler(templates *domain.Templates, page *domain.PageData) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
 		page.Router.Stats = utils.GetRouterStats(false)
 		page.DpiProp.Status = utils.GetDpiProtectionStatus()
 
@@ -64,11 +59,6 @@ func routerStatsHandler(templates *domain.Templates, page *domain.PageData) http
 
 func dpiSwitchHandler(templates *domain.Templates, page *domain.PageData) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
 		if err := utils.SwitchProtection(); err != nil {
 			http.Error(w, fmt.Sprintf("error switching dpi protection: %v", err), http.StatusInternalServerError)
 			return
