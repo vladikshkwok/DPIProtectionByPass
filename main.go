@@ -14,15 +14,12 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// Обработка статических файлов CSS
 	mux.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./css"))))
 
-	// Обработка маршрутов
 	mux.HandleFunc("/", indexHandler(templates, page))
 	mux.HandleFunc("/router/stats", routerStatsHandler(templates, page))
 	mux.HandleFunc("/dpi/switch", dpiSwitchHandler(templates, page))
 
-	// Запуск сервера с логированием запросов
 	log.Println("Server started on :8082")
 	if err := http.ListenAndServe(":8082", logRequest(mux)); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
