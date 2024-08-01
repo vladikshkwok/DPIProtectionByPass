@@ -1,0 +1,37 @@
+{{block "index" .}}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>ARE YOU OKAY?</title>
+        <script src="https://unpkg.com/htmx.org@2.0.1"
+                integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/"
+                crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="/css/main.css">
+    </head>
+    <body>
+    {{template "router-stats" .Router}}
+
+    {{ template "dpi-prot" .DpiProp }}
+    </body>
+    </html>
+{{end}}
+
+
+{{block "dpi-prot" .}}
+    <div class="admin-button">
+        <button name="switch-dpi" hx-post="/dpi/switch" hx-swap="outerHTML">
+            SWITCH DPI PROTECTION (CURRENT STATUS - {{ .Status }})
+        </button>
+    </div>
+{{end}}
+
+{{block "router-stats" . }}
+    <div class="router-info" hx-get="/router/stats" hx-trigger="every 3s" hx-swap="outerHTML">
+        {{range .Stats}}
+            <div class="info-block">
+                {{ .Text }}
+            </div>
+        {{end}}
+    </div>
+{{ end }}

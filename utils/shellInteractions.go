@@ -1,15 +1,16 @@
 package utils
 
 import (
-	"fmt"
+	"log"
 	"os/exec"
 )
 
-func ExecuteSimpleShellCommand(cmd string) {
+func ExecuteSimpleShellCommand(cmd string) error {
 	command := exec.Command(cmd)
 	output, err := command.Output()
 	if err != nil {
-		return
+		return err
 	}
-	fmt.Println(string(output))
+	log.Println(string(output))
+	return nil
 }

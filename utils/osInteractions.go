@@ -4,7 +4,7 @@ import (
 	"awesomeProject/domain"
 	"bufio"
 	"errors"
-	"fmt"
+	"log"
 	"os"
 	"strings"
 	"syscall"
@@ -13,9 +13,11 @@ import (
 func GetMemoryStats() domain.Memory {
 	file, err := os.Open("/proc/meminfo")
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("Error opening /proc/meminfo: %v", err)
+		return domain.Memory{}
 	}
 	defer file.Close()
+
 	scanner := bufio.NewScanner(file)
 	res := domain.Memory{}
 	for scanner.Scan() {
@@ -29,46 +31,57 @@ func GetMemoryStats() domain.Memory {
 			res.MemAvailable = value
 		}
 	}
+	if err := scanner.Err(); err != nil {
+		log.Printf("Error scanning /proc/meminfo: %v", err)
+	}
 	return res
 }
 
 func GetLoadAverage() domain.LoadAvg {
 	file, err := os.Open("/proc/loadavg")
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("Error opening /proc/loadavg: %v", err)
+		return domain.LoadAvg{}
 	}
 	defer file.Close()
+
 	scanner := bufio.NewScanner(file)
 	res := domain.LoadAvg{}
-	for scanner.Scan() {
+	if scanner.Scan() {
 		text := scanner.Text()
 		splittedText := strings.Split(text, " ")
-		res.Load1 = ToFloat(splittedText[0])
-		res.Load5 = ToFloat(splittedText[1])
-		res.Load15 = ToFloat(splittedText[2])
-		res.LastCreatedPid = ToInt(splittedText[4])
+		res.Load1, _ = ToFloat(splittedText[0])
+		res.Load5, _ = ToFloat(splittedText[1])
+		res.Load15, _ = ToFloat(splittedText[2])
+		res.LastCreatedPid, _ = ToInt(splittedText[4])
+	}
+	if err := scanner.Err(); err != nil {
+		log.Printf("Error scanning /proc/loadavg: %v", err)
 	}
 	return res
 }
 
 func GetDpiProtectionStatus() string {
 	fileName := "/tmp/dpi.run"
-	pid := 0
 	if _, err := os.Stat(fileName); errors.Is(err, os.ErrNotExist) {
 		return "OFF"
 	}
 
 	file, err := os.Open(fileName)
 	if err != nil {
+		log.Printf("Error opening %s: %v", fileName, err)
 		return "OFF"
 	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
+	pid := 0
 	for scanner.Scan() {
-		pid = ToInt(scanner.Text())
+		pid, _ = ToInt(scanner.Text())
 	}
-	fmt.Printf("Process pid=%d\n", pid)
+	if err := scanner.Err(); err != nil {
+		log.Printf("Error scanning %s: %v", fileName, err)
+	}
 
 	if !findProcessAndCheckForLiveness(pid) {
 		return "OFF"
@@ -79,27 +92,22 @@ func GetDpiProtectionStatus() string {
 
 func CheckProcessLiveliness(process *os.Process) bool {
 	err := process.Signal(syscall.Signal(0))
-	if err != nil {
-		return false
-	}
-
-	return true
+	return err == nil
 }
 
 func findProcessAndCheckForLiveness(pid int) bool {
 	process, err := os.FindProcess(pid)
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("Error finding process with PID %d: %v", pid, err)
 		return false
 	}
-	if !CheckProcessLiveliness(process) {
-		return false
-	}
-	return true
+	return CheckProcessLiveliness(process)
 }
 
-func parseMemoryStatsLine(raw string) (key string, value int) {
-	text := strings.ReplaceAll(raw[:len(raw)-2], " ", "")
+func parseMemoryStatsLine(raw string) (string, int) {
+	text := strings.TrimSpace(raw)
 	keyValue := strings.Split(text, ":")
-	return keyValue[0], ToInt(keyValue[1])
+	key := strings.TrimSpace(keyValue[0])
+	value, _ := ToInt(strings.Fields(keyValue[1])[0])
+	return key, value
 }

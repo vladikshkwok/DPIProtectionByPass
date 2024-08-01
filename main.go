@@ -1,40 +1,86 @@
 package main
 
 import (
+	"awesomeProject/domain"
 	"awesomeProject/utils"
 	"fmt"
+	"log"
 	"net/http"
 )
 
 func main() {
-	http.HandleFunc("/", homePage)
-	http.HandleFunc("/switch", switchProtection)
+	templates := domain.NewTemplates()
+	page := domain.NewPageData()
 
-	err := http.ListenAndServe(":8082", nil)
+	mux := http.NewServeMux()
 
-	if err != nil {
-		fmt.Println(err)
-		return
+	// Обработка статических файлов CSS
+	mux.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./css"))))
+
+	// Обработка маршрутов
+	mux.HandleFunc("/", indexHandler(templates, page))
+	mux.HandleFunc("/router/stats", routerStatsHandler(templates, page))
+	mux.HandleFunc("/dpi/switch", dpiSwitchHandler(templates, page))
+
+	// Запуск сервера с логированием запросов
+	log.Println("Server started on :8082")
+	if err := http.ListenAndServe(":8082", logRequest(mux)); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
 	}
 }
 
-func homePage(w http.ResponseWriter, r *http.Request) {
-	err := utils.PrintDefaultPage(w)
+func logRequest(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s %s %s\n", r.RemoteAddr, r.Method, r.URL)
+		handler.ServeHTTP(w, r)
+	})
+}
 
-	if err != nil {
-		fmt.Println(err)
-		return
+func indexHandler(templates *domain.Templates, page *domain.PageData) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		page.DpiProp.Status = utils.GetDpiProtectionStatus()
+		page.Router.Stats = utils.GetRouterStats(false)
+
+		log.Println("Return index page")
+
+		if err := templates.Render(w, "index", page); err != nil {
+			http.Error(w, fmt.Sprintf("error rendering template: %v", err), http.StatusInternalServerError)
+		}
 	}
 }
 
-func switchProtection(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Switch protection")
+func routerStatsHandler(templates *domain.Templates, page *domain.PageData) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
 
-	if utils.GetDpiProtectionStatus() == "OFF" {
-		fmt.Println("Process doesn't exist")
-		utils.ExecuteSimpleShellCommand("/etc/goodbyeDPI.sh")
-	} else {
-		fmt.Println("Process exist. Disable DPI protection")
-		utils.ExecuteSimpleShellCommand("/etc/disableDPIProtection.sh")
+		page.Router.Stats = utils.GetRouterStats(false)
+		page.DpiProp.Status = utils.GetDpiProtectionStatus()
+
+		if err := templates.Templates.ExecuteTemplate(w, "router-stats", page.Router); err != nil {
+			http.Error(w, fmt.Sprintf("error rendering template: %v", err), http.StatusInternalServerError)
+		}
+	}
+}
+
+func dpiSwitchHandler(templates *domain.Templates, page *domain.PageData) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		if err := utils.SwitchProtection(); err != nil {
+			http.Error(w, fmt.Sprintf("error switching dpi protection: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		page.DpiProp.Status = utils.GetDpiProtectionStatus()
+
+		if err := templates.Render(w, "dpi-prot", page.DpiProp); err != nil {
+			http.Error(w, fmt.Sprintf("error rendering template: %v", err), http.StatusInternalServerError)
+		}
 	}
 }
