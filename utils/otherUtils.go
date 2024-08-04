@@ -2,9 +2,11 @@ package utils
 
 import (
 	"awesomeProject/domain"
+	"bufio"
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 )
 
@@ -61,5 +63,80 @@ func SwitchProtection() error {
 		return errors.New("unknown DPI protection status")
 	}
 
+	return nil
+}
+
+func GetDomains() []string {
+	file, err := os.Open("/etc/domains.txt")
+	if err != nil {
+		log.Printf("Error opening /etc/domains.txt: %v", err)
+		return []string{}
+	}
+	defer file.Close()
+
+	var domains []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		domains = append(domains, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		log.Printf("Error reading /etc/domains.txt: %v", err)
+	}
+	return domains
+}
+
+func AddDomain(domain string) error {
+	file, err := os.OpenFile("/etc/domains.txt", os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil {
+		log.Printf("Error opening /etc/domains.txt: %v", err)
+		return err
+	}
+	defer file.Close()
+
+	if _, err := file.WriteString(domain + "\n"); err != nil {
+		log.Printf("Error writing to /etc/domains.txt: %v", err)
+		return err
+	}
+	return nil
+}
+
+func UpdateDomain(oldDomain, newDomain string) error {
+	domains := GetDomains()
+	for i, d := range domains {
+		if d == oldDomain {
+			domains[i] = newDomain
+			break
+		}
+	}
+
+	return writeDomainsToFile(domains)
+}
+
+func DeleteDomain(domain string) error {
+	domains := GetDomains()
+	for i, d := range domains {
+		if d == domain {
+			domains = append(domains[:i], domains[i+1:]...)
+			break
+		}
+	}
+
+	return writeDomainsToFile(domains)
+}
+
+func writeDomainsToFile(domains []string) error {
+	file, err := os.OpenFile("/etc/domains.txt", os.O_TRUNC|os.O_WRONLY, 0600)
+	if err != nil {
+		log.Printf("Error opening /etc/domains.txt: %v", err)
+		return err
+	}
+	defer file.Close()
+
+	for _, domain := range domains {
+		if _, err := file.WriteString(domain + "\n"); err != nil {
+			log.Printf("Error writing to /etc/domains.txt: %v", err)
+			return err
+		}
+	}
 	return nil
 }

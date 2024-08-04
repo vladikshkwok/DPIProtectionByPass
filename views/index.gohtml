@@ -4,19 +4,21 @@
     <head>
         <meta charset="UTF-8">
         <title>ARE YOU OKAY?</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="https://unpkg.com/htmx.org@2.0.1"
                 integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/"
                 crossorigin="anonymous"></script>
         <link rel="stylesheet" href="/css/main.css">
+        <script src="/js/scripts.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     </head>
     <body>
     {{template "router-stats" .Router}}
-
-    {{ template "dpi-prot" .DpiProp }}
+    {{template "dpi-prot" .DpiProp}}
+    {{template "domain-managements" .Domains}}
     </body>
     </html>
 {{end}}
-
 
 {{block "dpi-prot" .}}
     <div class="admin-button">
@@ -34,4 +36,51 @@
             </div>
         {{end}}
     </div>
+{{end}}
+
+{{block "domain-managements" .}}
+    <!-- Domain Management Block -->
+    <div class="domain-management">
+        <h2>Domain Management</h2>
+        <!-- Form to Add Domain -->
+        <div class="add-domain">
+            <form hx-post="/domains/add" hx-swap="none">
+                <input type="text" name="domain" placeholder="Enter domain" required>
+                <button type="submit">Add Domain</button>
+            </form>
+        </div>
+
+
+        <!-- Domain List -->
+        <div id="domain-list">
+            {{range .}}
+                {{template "domain-item" .}}
+            {{end}}
+        </div>
+    </div>
+{{end}}
+
+{{ block "oob-domain" . }}
+    <div id="domain-list" hx-swap-oob="afterend">
+        {{ template "domain-item" . }}
+    </div>
 {{ end }}
+
+{{block "domain-item" .}}
+    <div class="domain-item" id="domain-item-{{.}}">
+        <form class="edit-form" hx-put="/domains/update" hx-target="closest div" hx-swap="outerHTML">
+            <input type="hidden" name="oldDomain" value="{{ . }}">
+            <input type="text" name="newDomain" value="{{ . }}" class="domain-edit-input" style="display:none;">
+            <button type="submit" style="display:none;">Update</button>
+        </form>
+        <span class="domain-name">{{ . }}</span>
+        <button class="icon icon-trash" hx-delete="/domains/delete?domain={{ . }}" hx-target="closest div" hx-swap="outerHTML swap:500ms">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+        <button class="icon icon-pencil" onclick="enableEditMode(this)">
+            <i class="fas fa-pencil-alt"></i>
+        </button>
+    </div>
+{{end}}
+
+

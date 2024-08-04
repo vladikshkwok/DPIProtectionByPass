@@ -16,6 +16,7 @@ type RouterInfo struct {
 type PageData struct {
 	DpiProp *DPIProp
 	Router  *RouterInfo
+	Domains []string
 }
 
 func NewPageData() *PageData {
