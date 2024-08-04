@@ -1,4 +1,4 @@
-Несколько скриптов позволяющих используя [dpitunnel-cli](https://github.com/nomoresat/DPITunnel-cli) обходить DPI. 
+Несколько скриптов (в директории shellScripts) позволяющих используя [dpitunnel-cli](https://github.com/nomoresat/DPITunnel-cli) обходить DPI. 
 Также небольшой веб-сервер на go со свитчером этой защиты.
 
 На роутере с openWRT (либо с доступом по ssh) можно прописать в крон запуск googbyeDPI.sh. 
