@@ -44,7 +44,7 @@
         <h2>Domain Management</h2>
         <!-- Form to Add Domain -->
         <div class="add-domain">
-            <form hx-post="/domains/add" hx-swap="none">
+            <form hx-post="/domains" hx-swap="none">
                 <input type="text" name="domain" placeholder="Enter domain" required>
                 <button type="submit">Add Domain</button>
             </form>
@@ -68,13 +68,13 @@
 
 {{block "domain-item" .}}
     <div class="domain-item" id="domain-item-{{.}}">
-        <form class="edit-form" hx-put="/domains/update" hx-target="closest div" hx-swap="outerHTML">
+        <form class="edit-form" hx-put="/domains" hx-target="closest div" hx-swap="outerHTML">
             <input type="hidden" name="oldDomain" value="{{ . }}">
             <input type="text" name="newDomain" value="{{ . }}" class="domain-edit-input" style="display:none;">
             <button type="submit" style="display:none;">Update</button>
         </form>
         <span class="domain-name">{{ . }}</span>
-        <button class="icon icon-trash" hx-delete="/domains/delete?domain={{ . }}" hx-confirm="Are you sure to delete {{ . }} from block list?" hx-target="closest div" hx-swap="outerHTML swap:500ms">
+        <button class="icon icon-trash" hx-delete="/domains?domain={{ . }}" hx-confirm="Are you sure to delete {{ . }} from block list?" hx-target="closest div" hx-swap="outerHTML swap:500ms">
             <i class="fas fa-trash-alt"></i>
         </button>
         <button class="icon icon-pencil" onclick="enableEditMode(this)">

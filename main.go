@@ -18,11 +18,11 @@ func main() {
 	mux.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./css"))))
 	mux.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("./js"))))
 
-	mux.HandleFunc("/router/stats", rest.RouterStatsHandler(templates, page))
-	mux.HandleFunc("/dpi/switch", rest.DpiSwitchHandler(templates, page))
-	mux.HandleFunc("/domains/add", rest.AddDomainHandler(templates, page))
-	mux.HandleFunc("/domains/update", rest.UpdateDomainHandler(templates, page))
-	mux.HandleFunc("/domains/delete", rest.DeleteDomainHandler(templates, page))
+	mux.HandleFunc("GET /router/stats", rest.RouterStatsHandler(templates, page))
+	mux.HandleFunc("POST /dpi/switch", rest.DpiSwitchHandler(templates, page))
+	mux.HandleFunc("POST /domains", rest.AddDomainHandler(templates, page))
+	mux.HandleFunc("PUT /domains", rest.UpdateDomainHandler(templates, page))
+	mux.HandleFunc("DELETE /domains", rest.DeleteDomainHandler(templates, page))
 	mux.HandleFunc("/", indexHandler(templates, page))
 
 	log.Println("Server started on :8082")
