@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#me of the ipset
+# Name of the ipset
 IPSET_NAME="youtube_ipset"
 
 # Proxy port

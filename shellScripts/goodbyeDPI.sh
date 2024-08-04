@@ -5,4 +5,4 @@
 sysctl -w net.ipv4.ip_forward=1
 sysctl -w net.ipv4.conf.all.send_redirects=0
 
-sh /etc/dpithird.sh
+sh /etc/dnsmasqConfiguration.sh

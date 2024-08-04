@@ -61,7 +61,7 @@
 {{end}}
 
 {{ block "oob-domain" . }}
-    <div id="domain-list" hx-swap-oob="afterend">
+    <div id="domain-list" hx-swap-oob="afterbegin">
         {{ template "domain-item" . }}
     </div>
 {{ end }}
@@ -74,7 +74,7 @@
             <button type="submit" style="display:none;">Update</button>
         </form>
         <span class="domain-name">{{ . }}</span>
-        <button class="icon icon-trash" hx-delete="/domains/delete?domain={{ . }}" hx-target="closest div" hx-swap="outerHTML swap:500ms">
+        <button class="icon icon-trash" hx-delete="/domains/delete?domain={{ . }}" hx-confirm="Are you sure to delete {{ . }} from block list?" hx-target="closest div" hx-swap="outerHTML swap:500ms">
             <i class="fas fa-trash-alt"></i>
         </button>
         <button class="icon icon-pencil" onclick="enableEditMode(this)">
