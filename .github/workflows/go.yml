@@ -22,7 +22,10 @@ jobs:
         go-version: '1.22'
 
     - name: Build
-      run: env GOOS=linux GOARCH=arm64 go build -o forarm64
+      run: env GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -o switcher_arm64
+
+    - name: Compress binary file
+      run: upx --best --lzma switcher_arm64
 
     - name: Create Release
       id: create_release
@@ -42,6 +45,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./forarm64
-        asset_name: forarm64
+        asset_path: ./switcher_arm64
+        asset_name: switcher_arm64
         asset_content_type: application/octet-stream
